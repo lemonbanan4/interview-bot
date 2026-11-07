@@ -1,0 +1,23 @@
+{
+  "version": "0.1.1",
+  "notes": "Performance improvements and enhanced stealth HUD tracking.",
+  "pub_date": "2026-06-06T12:00:00Z",
+  "platforms": {
+    "darwin-aarch64": {
+      "signature": "PASTE_CONTENTS_OF_.app.tar.gz.sig",
+      "url": "https://releases.interviewcopilot.app/v0.1.1/Interview.Copilot_aarch64.app.tar.gz"
+    },
+    "darwin-x86_64": {
+      "signature": "PASTE_CONTENTS_OF_.app.tar.gz.sig",
+      "url": "https://releases.interviewcopilot.app/v0.1.1/Interview.Copilot_x64.app.tar.gz"
+    },
+    "windows-x86_64": {
+      "signature": "PASTE_CONTENTS_OF_.nsis.zip.sig",
+      "url": "https://releases.interviewcopilot.app/v0.1.1/Interview.Copilot_x64-setup.nsis.zip"
+    },
+    "linux-x86_64": {
+      "signature": "PASTE_CONTENTS_OF_.AppImage.tar.gz.sig",
+      "url": "https://releases.interviewcopilot.app/v0.1.1/Interview.Copilot_amd64.AppImage.tar.gz"
+    }
+  }
+}

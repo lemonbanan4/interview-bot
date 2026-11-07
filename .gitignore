@@ -19,10 +19,13 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
 *.pem
+*.log
+Thumbs.db
 
 # debug
 npm-debug.log*
@@ -30,8 +33,15 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — keep example only
+.env
+.env.*
+!.env.example
+
+# local sqlite
+/prisma/*.db
+/prisma/*.db-journal
+/prisma/dev.db*
 
 # vercel
 .vercel
@@ -39,3 +49,36 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# tauri / rust
+/src-tauri/target
+/src-tauri/ui-dist
+/src-tauri/gen
+/src-tauri/WixTools
+*.key
+!*.key.pub
+*.p12
+*.cer
+*.certSigningRequest
+*.p12.base64
+*.sig
+
+# IDE / local agent skill mirrors (not part of the product)
+.idea/
+.vscode/
+.agents/
+.claude/
+.cursor/
+.devin/
+.codex/
+*.swp
+*~
+
+# OS
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# docker / local volumes
+docker-data/

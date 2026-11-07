@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Signal — Real-Time Interview Copilot
 
-## Getting Started
+Next.js architecture: **Web Audio mic chunks → Deepgram STT → GPT-4o coach → SSE talking points**, with a glassmorphic dual-panel HUD.
 
-First, run the development server:
+## Architecture
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+[ Browser / Client ]
+  useAudioCapture (Web Audio API)
+    └── 16 kHz mono PCM windows (~1.8s)
+          │
+          ▼ POST /api/live { audioBase64, sttOnly: true }
+          │     Deepgram STT → transcript
+          ▼
+  useInterviewCopilot (Vercel AI SDK useCompletion)
+          │
+          ▼ POST /api/copilot  { prompt, resume… }
+[ Next.js + AI SDK ]
+  streamText(gpt-4o) → toTextStreamResponse()
+          │
+          ▼ token stream → StreamingSuggestions HUD
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### SSE events from `/api/live`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Event | Payload |
+| --- | --- |
+| `status` | `{ stage: "stt" \| "coaching" \| … }` |
+| `transcript` | `{ text, isFinal }` |
+| `token` | `{ text }` streaming model tokens |
+| `bullet` | `{ text }` (mock / progressive) |
+| `result` | `{ title, bullets[] }` |
+| `error` / `done` | terminal |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## App routes
 
-## Learn More
+| Path | Purpose |
+| --- | --- |
+| `/` | Resume + job description upload |
+| `/session` | Live HUD (transcript ‖ AI bullets) |
+| `/dashboard` | Post-interview history & scores |
+| `POST /api/live` | Audio → STT → coach SSE |
+| `POST /api/review` | End-of-session summary + score |
+| `POST /api/transcription` | Optional Deepgram browser token |
+| `POST /api/copilot` | Text-only coach SSE (legacy/helper) |
 
-To learn more about Next.js, take a look at the following resources:
+## Key modules
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+├── hooks/
+│   ├── useAudioCapture.ts   # Web Audio → PCM chunks/windows
+│   └── useLiveCopilot.ts    # POST /api/live + SSE consumer
+├── app/api/live/route.ts    # Deepgram + GPT-4o + SSE
+├── components/copilot/
+│   ├── AudioVisualizer.tsx
+│   ├── LiveTranscriptFeed.tsx
+│   └── ActionCardGrid.tsx
+└── lib/
+    ├── deepgram.ts
+    ├── llm.ts
+    └── prompts.ts           # INTERVIEW_COACH_SYSTEM
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Setup
 
-## Deploy on Vercel
+```bash
+npm install
+cp .env.example .env.local
+# set DEEPGRAM_API_KEY + OPENAI_API_KEY as needed
+npx prisma migrate dev   # applies SQLite schema to prisma/dev.db
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Database
+
+- Local: SQLite via `DATABASE_URL="file:./dev.db"` → `prisma/dev.db`
+- Prisma 6 (`prisma migrate` / `prisma generate`)
+- Client helper: `src/lib/prisma.ts`
+
+```bash
+npm run db:migrate   # create/apply migrations
+npm run db:studio    # browse data
+```
+
+### Auth (Auth.js / NextAuth v5)
+
+- Config: `src/auth.ts` (Prisma adapter + Google + Email/Nodemailer)
+- Route: `src/app/api/auth/[...nextauth]/route.ts`
+- Protection: `src/proxy.ts` guards `/dashboard` and `/session`
+- Sign-in UI: `/login`
+
+```bash
+AUTH_SECRET=...
+AUTH_GOOGLE_ID=...
+AUTH_GOOGLE_SECRET=...
+EMAIL_SERVER=smtp://user:pass@smtp.example.com:587
+EMAIL_FROM="Signal <noreply@yourdomain.com>"
+```
+
+Without API keys you can still type questions in the live HUD — coaching falls back to local heuristics; STT requires Deepgram for mic windows.
+
+### Desktop companion (Tauri)
+
+```bash
+npm run tauri:dev          # HUD against localhost:3000
+npm run tauri:build:dmg    # macOS .app + .dmg (+ .sig with updater key)
+npm run tauri:build:msi    # Windows .msi + NSIS (on Windows)
+```
+
+Signing, notarization, and GitHub Actions release tagging: [docs/desktop-release.md](docs/desktop-release.md).  
+CI secrets checklist: [docs/github-release-secrets.md](docs/github-release-secrets.md).

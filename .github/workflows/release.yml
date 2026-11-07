@@ -1,0 +1,115 @@
+name: Release Tauri App
+
+on:
+  push:
+    tags:
+      - "v*" # e.g. v1.0.0
+
+jobs:
+  publish:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: --bundles app,dmg
+          - platform: windows-latest
+            args: --bundles msi,nsis
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust Build Artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri -> target"
+
+      - name: Install Frontend Dependencies
+        run: npm ci
+
+      - name: Detect signing secrets
+        id: signing
+        shell: bash
+        run: |
+          if [ -n "${{ secrets.APPLE_CERTIFICATE }}" ]; then
+            echo "apple_cert=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "apple_cert=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "${{ secrets.WINDOWS_CERTIFICATE }}" ]; then
+            echo "win_cert=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "win_cert=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Import Windows code-signing certificate
+        if: matrix.platform == 'windows-latest' && steps.signing.outputs.win_cert == 'true'
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path certificate | Out-Null
+          Set-Content -Path certificate/tempCert.txt -Value $env:WINDOWS_CERTIFICATE
+          certutil -decode certificate/tempCert.txt certificate/certificate.pfx
+          Remove-Item certificate/tempCert.txt
+          Import-PfxCertificate `
+            -FilePath certificate/certificate.pfx `
+            -CertStoreLocation Cert:\CurrentUser\My `
+            -Password (ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText)
+
+      # Map repo secret names → env vars expected by Tauri CLI / bundler.
+      # Prefer TAURI_PRIVATE_KEY; fall back to TAURI_SIGNING_PRIVATE_KEY.
+      - name: Build Tauri (unsigned / updater-key only)
+        if: matrix.platform != 'macos-latest' || steps.signing.outputs.apple_cert != 'true'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "AI Interview Copilot ${{ github.ref_name }}"
+          releaseBody: "Automated production build for macOS and Windows."
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
+
+      # Empty APPLE_CERTIFICATE makes the macOS bundler fail — only pass Apple
+      # secrets when a real certificate is configured.
+      - name: Build Tauri (macOS signed + notarized)
+        if: matrix.platform == 'macos-latest' && steps.signing.outputs.apple_cert == 'true'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY || secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD || secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "AI Interview Copilot ${{ github.ref_name }}"
+          releaseBody: "Automated production build for macOS and Windows."
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}

@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-set-click-through"
+description = "Allow the frontend to toggle mouse click-through / passthrough on the overlay window."
+commands.allow = ["set_click_through"]

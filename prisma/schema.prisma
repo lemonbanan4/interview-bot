@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String             @id @default(cuid())
+  name               String?
+  email              String?            @unique
+  emailVerified      DateTime?
+  image              String?
+  stripeCustomerId   String?            @unique
+  subscriptionStatus String             @default("inactive") // inactive, active, unlimited, canceled
+  plan               String             @default("free") // free | pro | unlimited
+  creditsRemaining   Int                @default(60) // minutes remaining
+  accounts           Account[]
+  sessions           Session[]
+  interviewSessions  InterviewSession[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model InterviewSession {
+  id           String                @id @default(cuid())
+  userId       String
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobTitle     String
+  company      String?
+  duration     String? // e.g., "42 mins"
+  overallScore Int? // out of 100
+  strengths    Json                  @default("[]") // string[]
+  improvements Json                  @default("[]") // string[]
+  transcripts  TranscriptItem[]
+  scorecard    PerformanceScorecard?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+}
+
+model TranscriptItem {
+  id        String           @id @default(cuid())
+  sessionId String
+  session   InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  speaker   String // "Interviewer" | "Candidate" | "AI Copilot"
+  text      String
+  timestamp String // e.g., "02:14"
+  createdAt DateTime         @default(now())
+}
+
+model PerformanceScorecard {
+  id                   String           @id @default(cuid())
+  sessionId            String           @unique
+  session              InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  technicalAccuracy    Int // 0-100
+  communicationClarity Int // 0-100
+  pacingAndConfidence  Int // 0-100
+  createdAt            DateTime         @default(now())
+}

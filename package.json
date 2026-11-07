@@ -6,21 +6,52 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio",
+    "postinstall": "prisma generate",
+    "tauri": "tauri",
+    "tauri:prepare-ui": "node scripts/prepare-tauri-ui.mjs",
+    "tauri:dev": "npm run tauri:prepare-ui && tauri dev",
+    "tauri:build": "npm run tauri:prepare-ui && tauri build",
+    "tauri:build:dmg": "npm run tauri:prepare-ui && tauri build --bundles app,dmg",
+    "tauri:build:msi": "npm run tauri:prepare-ui && tauri build --bundles msi,nsis",
+    "db:seed": "prisma db seed"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^4.0.109",
+    "@ai-sdk/react": "^4.0.167",
+    "@auth/prisma-adapter": "^2.11.3",
+    "@deepgram/sdk": "^5.18.0",
+    "@prisma/client": "^6.19.3",
+    "@tauri-apps/api": "^2.12.4",
+    "@tauri-apps/plugin-process": "^2.4.0",
+    "@tauri-apps/plugin-updater": "^2.14.1",
+    "ai": "^7.0.163",
     "next": "16.4.5",
+    "next-auth": "^5.0.0-beta.32",
+    "nodemailer": "^8.0.11",
+    "openai": "^7.53.0",
+    "prisma": "^6.19.3",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "stripe": "^23.1.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+    "@tauri-apps/cli": "^2.12.4",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

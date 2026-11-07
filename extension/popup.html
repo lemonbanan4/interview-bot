@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signal Copilot</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        width: 280px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #020617;
+        color: #e2e8f0;
+      }
+      main {
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 14px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #2dd4bf;
+      }
+      p {
+        margin: 0;
+        font-size: 12px;
+        line-height: 1.45;
+        color: #94a3b8;
+      }
+      textarea {
+        width: 100%;
+        min-height: 88px;
+        resize: vertical;
+        box-sizing: border-box;
+        border-radius: 10px;
+        border: 1px solid #1e293b;
+        background: #0f172a;
+        color: #f8fafc;
+        padding: 8px;
+        font: inherit;
+      }
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 9px 12px;
+        font-weight: 600;
+        cursor: pointer;
+        background: #2dd4bf;
+        color: #042f2e;
+      }
+      button.secondary {
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #1e293b;
+      }
+      #status {
+        min-height: 16px;
+        font-size: 11px;
+        color: #64748b;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Signal HUD</h1>
+      <p>Push talking points into the Meet/Zoom overlay on the active tab.</p>
+      <textarea id="suggestion" placeholder="Paste AI talking points…"></textarea>
+      <button id="pushBtn" type="button">Push to meeting tab</button>
+      <button id="openAppBtn" class="secondary" type="button">Open Signal app</button>
+      <div id="status"></div>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

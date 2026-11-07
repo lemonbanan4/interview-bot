@@ -1,0 +1,80 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Interview Copilot",
+  "version": "0.1.0",
+  "identifier": "com.interviewcopilot.desktop",
+  "build": {
+    "frontendDist": "ui-dist",
+    "devUrl": "http://localhost:3000/hud",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run tauri:prepare-ui"
+  },
+  "app": {
+    "macOSPrivateApi": true,
+    "trayIcon": {
+      "id": "main",
+      "iconPath": "icons/tray-icon.png",
+      "iconAsTemplate": true,
+      "tooltip": "Signal \u2014 Interview Copilot",
+      "showMenuOnLeftClick": true
+    },
+    "windows": [
+      {
+        "label": "main",
+        "title": "AI Copilot Stealth HUD",
+        "url": "index.html",
+        "width": 380,
+        "height": 180,
+        "minWidth": 320,
+        "minHeight": 140,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "shadow": false,
+        "focus": false,
+        "visible": false,
+        "visibleOnAllWorkspaces": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "signingIdentity": "Developer ID Application: CogCore LLC (HT252YCTSN)",
+      "hardenedRuntime": true,
+      "minimumSystemVersion": "11.0"
+    },
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "http://timestamp.digicert.com"
+    },
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ0QjhCNzExM0FBNDVGQUYKUldTdlg2UTZFYmU0MUZiTHN0T09BT3JQcGtOaS9jTWZ4dEQwek1VM0svY1hXSnZwVFF1djVHVkMK",
+      "endpoints": [
+        "https://app.interviewcopilot.app/api/releases/latest?target={{target}}&arch={{arch}}&current_version={{current_version}}",
+        "http://localhost:3000/api/releases/latest?target={{target}}&arch={{arch}}&current_version={{current_version}}"
+      ]
+    }
+  }
+}
