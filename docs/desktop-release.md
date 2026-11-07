@@ -5,11 +5,17 @@
 ### macOS (`.app` + `.dmg`)
 
 ```bash
-export TAURI_SIGNING_PRIVATE_KEY="$HOME/.tauri/copilot-key.key"
-# optional password if the key was generated with one:
-# export TAURI_SIGNING_PRIVATE_KEY_PASSWORD="…"
+# Preferred: load Apple + Tauri secrets from Keychain
+eval "$(./scripts/secrets-keychain.sh export)"
+# or: export TAURI_SIGNING_PRIVATE_KEY="$HOME/.tauri/copilot-key.key"
 
 npm run tauri:build:dmg
+
+# After Apple accepts notarization:
+npm run desktop:notarize-wait
+
+# Publish local artifacts to GitHub Releases + refresh updater URLs:
+npm run desktop:publish-release
 ```
 
 Artifacts:

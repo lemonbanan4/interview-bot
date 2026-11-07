@@ -1,11 +1,11 @@
 {
   "version": "0.1.0",
   "notes": "Initial desktop companion release with Stealth HUD, tray controls, and live coaching.",
-  "pub_date": "2026-11-07T16:00:00.000Z",
+  "pub_date": "2026-11-07T22:03:21.000Z",
   "platforms": {
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTdlg2UTZFYmU0MUFYTVFPcndEekdtUFFoS1gvd2dQaG14VlpXK3d2RDJHdk5vQkNNM3V5N0Q5amVMREUzQlA4K0J4aGViN1orZXVXdkk4WFJkcythQWE2Q3FBdVYwMHc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0MDY1ODUyCWZpbGU6SW50ZXJ2aWV3IENvcGlsb3QuYXBwLnRhci5negl2ZXJzaW9uOjAuMS4wCnRaQ2hQUzRDWXRiN2dWUXFzdUNpUzhtMzFtaE1uZjVROGlDdzNMZTNFNlRyeTdxRDhCSkc5Y1FLTEJEc2VVOUs4TCt5MGxtd2VYUzFRTGlHVXhlUUJBPT0K",
-      "url": "https://releases.interviewcopilot.app/v0.1.0/Interview.Copilot_aarch64.app.tar.gz"
+      "url": "https://github.com/lemonbanan4/interview-bot/releases/download/v0.1.0/Interview%20Copilot.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTdlg2UTZFYmU0MUFYTVFPcndEekdtUFFoS1gvd2dQaG14VlpXK3d2RDJHdk5vQkNNM3V5N0Q5amVMREUzQlA4K0J4aGViN1orZXVXdkk4WFJkcythQWE2Q3FBdVYwMHc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzk0MDY1ODUyCWZpbGU6SW50ZXJ2aWV3IENvcGlsb3QuYXBwLnRhci5negl2ZXJzaW9uOjAuMS4wCnRaQ2hQUzRDWXRiN2dWUXFzdUNpUzhtMzFtaE1uZjVROGlDdzNMZTNFNlRyeTdxRDhCSkc5Y1FLTEJEc2VVOUs4TCt5MGxtd2VYUzFRTGlHVXhlUUJBPT0K"
     },
     "darwin-x86_64": {
       "signature": "PASTE_CONTENTS_OF_Interview_Copilot.app.tar.gz.sig",

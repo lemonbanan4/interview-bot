@@ -75,9 +75,23 @@ gh secret set APPLE_TEAM_ID -b"HT252YCTSN"
 
 ---
 
-## Helper script
+## Local secure storage (macOS Keychain)
 
-With a GitHub remote configured:
+Sensitive values are stored in Keychain service `interview-bot.secrets` (not plaintext in `.env`):
+
+```bash
+# One-time: copy current .env / ~/.tauri secrets into Keychain and scrub .env
+./scripts/secrets-keychain.sh store-from-env
+
+# Before local signed builds / notarization
+eval "$(./scripts/secrets-keychain.sh export)"
+npm run tauri:build:dmg
+
+# Push Keychain → GitHub Actions secrets
+./scripts/secrets-keychain.sh sync-github
+```
+
+## Helper script (interactive)
 
 ```bash
 ./scripts/set-github-release-secrets.sh

@@ -17,6 +17,11 @@
     "tauri:build": "npm run tauri:prepare-ui && tauri build",
     "tauri:build:dmg": "npm run tauri:prepare-ui && tauri build --bundles app,dmg",
     "tauri:build:msi": "npm run tauri:prepare-ui && tauri build --bundles msi,nsis",
+    "secrets:store": "./scripts/secrets-keychain.sh store-from-env",
+    "secrets:export": "./scripts/secrets-keychain.sh export",
+    "secrets:sync-github": "./scripts/secrets-keychain.sh sync-github",
+    "desktop:notarize-wait": "./scripts/notarize-wait.sh",
+    "desktop:publish-release": "./scripts/publish-github-release.sh",
     "db:seed": "prisma db seed"
   },
   "prisma": {
