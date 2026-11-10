@@ -1,0 +1,33 @@
+# Gitleaks config for Signal interview-bot
+# https://github.com/gitleaks/gitleaks
+#
+# Detects leaked API keys (OpenAI, Stripe, Deepgram, …) and credentialed DB URLs.
+# Placeholders in .env.example / docker-compose are allowlisted.
+
+title = "signal-interview-bot"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Placeholder secrets, lockfiles, and local-only examples"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''(^|/)package-lock\.json$''',
+  '''(^|/)src-tauri/Cargo\.lock$''',
+  '''(^|/)\.gitleaks\.toml$''',
+  '''(^|/)\.trufflehog-exclude$''',
+  '''(^|/)docker-compose\.ya?ml$''',
+  '''(^|/)\.github/workflows/.*$''',
+  '''(^|/)secrets/vault/.*\.enc$''',
+  '''(^|/)secrets/rotation-manifest\.json$''',
+]
+regexes = [
+  '''sk_test_\.\.\.''',
+  '''whsec_\.\.\.''',
+  '''price_\.\.\.''',
+  '''postgresql://signal:signal@localhost''',
+  '''postgresql://postgres:postgres@127\.0\.0\.1''',
+  '''yourdomain\.com''',
+  '''noreply@localhost''',
+]

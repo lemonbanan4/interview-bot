@@ -12,6 +12,15 @@
 
 # testing
 /coverage
+/i18n-coverage-report.json
+/i18n-coverage-report.md
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/e2e/.auth/
+/load-tests/results/*
+!/load-tests/results/.gitkeep
 
 # next.js
 /.next/
@@ -37,6 +46,14 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+
+# AES-256-GCM encrypted vault blobs (no plaintext) are safe to commit
+!/secrets/vault/
+!/secrets/vault/*.enc
+!/secrets/rotation-manifest.json
+
+# Local Postgres dump archives (scripts/backup-db.sh)
+/backups/
 
 # local sqlite
 /prisma/*.db
@@ -82,3 +99,6 @@ next-env.d.ts
 
 # docker / local volumes
 docker-data/
+
+*storybook.log
+storybook-static
