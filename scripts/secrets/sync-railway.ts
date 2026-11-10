@@ -93,49 +93,63 @@ function railwayVariablesSet(
     throw new Error("RAILWAY_TOKEN (or RAILWAY_API_TOKEN) is required");
   }
 
-  // Prefer CLI when available — uses project link from RAILWAY_TOKEN.
+  // Prefer GraphQL when project/environment IDs are available — more reliable
+  // with project-scoped RAILWAY_TOKEN than CLI flags that re-select env.
+  if (
+    process.env.RAILWAY_PROJECT_ID?.trim() &&
+    process.env.RAILWAY_ENVIRONMENT_ID?.trim()
+  ) {
+    return upsertViaGraphql(pairs, {
+      token,
+      environment: opts.environment,
+      serviceId: opts.serviceId,
+    });
+  }
+
   const hasCli =
     spawnSync("railway", ["--version"], {
       encoding: "utf8",
     }).status === 0;
 
-  if (hasCli) {
-    const updated: string[] = [];
-    const secretValues = pairs.map((p) => p.value);
-    for (const { key, value } of pairs) {
-      const args = [
-        "variables",
-        "--set",
-        `${key}=${value}`,
-        "--skip-deploys",
-        "--environment",
-        opts.environment,
-      ];
-      if (opts.serviceId) {
-        args.push("--service", opts.serviceId);
-      }
-      const result = spawnSync("railway", args, {
-        encoding: "utf8",
-        env: { ...process.env, RAILWAY_TOKEN: token },
-      });
-      if (result.status !== 0) {
-        const err = redactSpawnOutput(
-          `${result.stderr || ""}\n${result.stdout || ""}`,
-          secretValues,
-        );
-        throw new Error(`railway variables --set ${key} failed: ${err.trim()}`);
-      }
-      updated.push(key);
-    }
-    return { updated, ok: true };
+  if (!hasCli) {
+    throw new Error(
+      "Railway CLI not found and RAILWAY_PROJECT_ID/RAILWAY_ENVIRONMENT_ID unset",
+    );
   }
 
-  // GraphQL fallback when CLI is absent (variableCollectionUpsert).
-  return upsertViaGraphql(pairs, {
-    token,
-    environment: opts.environment,
-    serviceId: opts.serviceId,
-  });
+  // Project tokens are already bound to one environment — do not pass
+  // --environment (Railway returns "Invalid RAILWAY_TOKEN" when you do).
+  const usingProjectToken = Boolean(process.env.RAILWAY_TOKEN?.trim());
+  const updated: string[] = [];
+  const secretValues = pairs.map((p) => p.value);
+  for (const { key, value } of pairs) {
+    const args = ["variables", "--set", `${key}=${value}`, "--skip-deploys"];
+    if (!usingProjectToken) {
+      args.push("--environment", opts.environment);
+    }
+    if (opts.serviceId) {
+      args.push("--service", opts.serviceId);
+    }
+    // Project token auth must not also set RAILWAY_API_TOKEN.
+    const childEnv: NodeJS.ProcessEnv = {
+      ...process.env,
+      RAILWAY_TOKEN: token,
+    };
+    delete childEnv.RAILWAY_API_TOKEN;
+    const result = spawnSync("railway", args, {
+      encoding: "utf8",
+      env: childEnv,
+    });
+    if (result.status !== 0) {
+      const err = redactSpawnOutput(
+        `${result.stderr || ""}\n${result.stdout || ""}`,
+        secretValues,
+      );
+      throw new Error(`railway variables --set ${key} failed: ${err.trim()}`);
+    }
+    updated.push(key);
+  }
+  return { updated, ok: true };
 }
 
 function upsertViaGraphql(
